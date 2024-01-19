@@ -6,7 +6,7 @@ const DashHeader = () => {
         <header>
             <div>
                 <Link to="/">
-                    <h1>Pomnom</h1>
+                    <h2 className='absolute'>Pomnom</h2>
                 </Link>
             </div>
         </header>

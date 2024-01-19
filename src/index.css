@@ -1,4 +1,14 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  height: 100dvh;
+  min-height: 100vh;
+}
+
 body {
+  height: 100%;
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
@@ -8,8 +18,12 @@ body {
   background-color: darkslategray;
   text-align: center;
   color: gainsboro;
+  letter-spacing: 0.2em;
 }
 
+#root{
+  height: 100%;
+}
 code {
   font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
@@ -18,8 +32,33 @@ code {
 a:visited{
   color: rgb(33, 143, 110);
   text-decoration: none;
+  border-style: solid;
 }
-
 a:hover{
   color: black;
 }
+
+.btn_small_basic {
+  border-style: solid;
+  border-radius: 0.5rem; /* 12px */
+  border-width: 1px;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+  letter-spacing: 0.1em;
+  font-size: 1.1rem;
+}
+
+input {
+  background-color: transparent;
+  text-align: center;
+  /* margin-top: 0.5rem; */
+  /* margin-bottom: 0.5rem; */
+  border-radius: 0.5rem; /* 12px */
+}
+
+input:hover {
+  background-color: rgba(46, 139, 86, 0.281);
+}
+

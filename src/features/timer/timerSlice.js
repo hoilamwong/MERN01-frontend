@@ -1,32 +1,34 @@
 import { createSlice } from '@reduxjs/toolkit'
 
 const initialState = {
-  timer:{
-    user: null,
-    timerType: "pomodoro",
+  user: null,
+  title: "Pomodoro",
+  description: "The Pomodoro Technique is a time management method developed by Francesco Cirillo in the late 1980s.",
+  tags: ['#pomodoro'],
+  time: {
+    type: "pomodoro",
     status: 'paused', //started | paused | completed | 
-    title: "Pomodoro",
-    description: "no description yet",
-    time: '25*60', //default 25 min ( 25 * 60 sec)
-    tags: ['#pomodoro'],
-    timeStarted: null 
+    duration:25 * 60 * 1000, //default 25 min ( 25 * 60 s *1000 ms)
+    timeStarted: null
   }
 }
 
 const timerSlice = createSlice({
-  name:'timer',
+  name: 'timer',
   initialState,
-  reducers:{
-    timerEdited: {
-      reducer(state, action){
-        action.map(edit => {
-          console.log(edit);
-        })
-        console.log('state', state.timer);
-      }
+  reducers: {
+    /* Update different text fields dynamically */
+    editText: (state, action) => {
+      const field = action.payload[0] //action.payload [e.target.name, e.target.value]
+      const text = action.payload[1] //refer to Timer.js
+      state[`${field}`] = text
     }
   }
 })
 
-export default timerSlice
+export const selectTimer = (state) => state.timer
+export const { editText } = timerSlice.actions
+
+
+export default timerSlice.reducer;
 
