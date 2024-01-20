@@ -15,16 +15,20 @@ export default function Timer() {
   const currentStatus = timer.time.status
 
   const [seconds, setSeconds] = useState(timer.time.remaining)
-  const [isMount, setIsMount] = useState(false)
 
   let intervalCounter
+
+  useEffect(() => {
+    localStorage.setItem('localTimerActivity', JSON.stringify(timer))
+  }, [timer])
+
 
   /* Set second every second if status is 'running' */
   useEffect(() => {
     if (timer.time.status === 'running') {
-      intervalCounter = setInterval(function() {
+      intervalCounter = setInterval(function () {
         setSeconds((prevSec) => {
-          if(prevSec <= 0){
+          if (prevSec <= 0) {
             clearInterval(intervalCounter)
             return 0
           }
@@ -37,7 +41,7 @@ export default function Timer() {
 
   useEffect(() => {
     if (timer.time.status !== 'running') return
-    if(seconds > 0) {
+    if (seconds > -1) {
       dispatch(changeTimerStatus({ type: "remaining", value: seconds }))
     } else {
       dispatch(changeTimerStatus({ type: "status", value: "completed" }))
@@ -89,6 +93,7 @@ export default function Timer() {
 
   const handleResetTimer = (e) => {
     dispatch(changeTimerStatus({ type: "status", value: "default" }))
+    dispatch(changeTimerStatus({ type: "remaining", value: timer.time.duration }))
     setSeconds(timer.time.duration)
   }
 
