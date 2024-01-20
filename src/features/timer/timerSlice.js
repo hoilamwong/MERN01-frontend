@@ -2,16 +2,19 @@ import { createSlice } from '@reduxjs/toolkit'
 
 const initialState = {
   user: null,
-  title: "Pomodoro",
-  description: "The Pomodoro Technique is a time management method developed by Francesco Cirillo in the late 1980s.",
-  tags: ['#pomodoro'],
+  title: "Pomodoro #0",
+  description: "Chapter 1 | What is Pomodoro Technique? | How to Use? |",
+  tags: ['pomodoro'],
   time: {
     type: "pomodoro",
-    status: 'paused', //started | paused | completed | 
-    duration:25 * 60 * 1000, //default 25 min ( 25 * 60 s *1000 ms)
-    timeStarted: null
+    status: "default", //default | running | paused | completed | 
+    duration: 0.1 * 60 * 1000, //default 25 min ( 25 * 60 s *1000 ms)
+    remaining: 0.05 * 60 * 1000,
+    timeStarted: null,
+    timeEnd: null,
   }
 }
+
 
 const timerSlice = createSlice({
   name: 'timer',
@@ -19,16 +22,32 @@ const timerSlice = createSlice({
   reducers: {
     /* Update different text fields dynamically */
     editText: (state, action) => {
-      const field = action.payload[0] //action.payload [e.target.name, e.target.value]
-      const text = action.payload[1] //refer to Timer.js
-      state[`${field}`] = text
-    }
+      //action.payload : [e.target.name, e.target.value]
+      const field = action.payload[0] //refer to Timer.js
+      const value = action.payload[1]
+      state[`${field}`] = value
+    },
+    changeTimerStatus: (state, action) => {
+      const { type, value } = action.payload
+      state.time[`${type}`] = value
+      // console.log(state.time.remaining);
+      if (value === 'running' && !state.time.timeStarted ) {
+        state.time.timeStarted = new Date().toString()
+        // console.log("UTC string:");
+        // console.log(dt.toUTCString());
+        // console.log("Local string");
+        // console.log(dt.toString());
+        // console.log("Hours UTC:   " + dt.getUTCHours());
+        // console.log("Hours local: " + dt.getHours());
+      }else if(value === 'completed' ){
+        state.time.timeEnd = new Date().toString()
+      }
+      console.log(state.time.timeStarted, state.time.timeEnd);
+    },
   }
 })
 
 export const selectTimer = (state) => state.timer
-export const { editText } = timerSlice.actions
-
+export const { editText, changeTimerStatus } = timerSlice.actions
 
 export default timerSlice.reducer;
-

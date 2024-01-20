@@ -1,109 +1,181 @@
 import { useSelector, useDispatch } from 'react-redux'
-import {
-  selectTimer,
-  editText
-} from './timerSlice'
-import { formatDate } from '../helper'
-import { IoIosAdd } from "react-icons/io";
-import { IoIosRefresh } from "react-icons/io";
-import { FaPlay } from "react-icons/fa";
+import { IoIosAdd, IoIosRefresh } from "react-icons/io";
+import { FaPlay, FaPause } from "react-icons/fa";
 import { GiSaveArrow } from "react-icons/gi";
+import { selectTimer, editText, changeTimerStatus } from './timerSlice'
+import { formatDate, createSmallButtons } from '../helper'
+import { useEffect, useState, useRef } from 'react';
 
 export default function Timer() {
-  const dispatch = useDispatch()
-  const timer = useSelector(selectTimer)
-
   const TIMER_ACTIONS = ['Start', 'Pause', 'Reset']
   const TIMER_TYPES = ['Pomodoro', 'Short Break', 'Long Break']
 
-  const timerActionsButtons = () => {
-    return (
-      <div className='py-2 flex-col items-center'>
-        <button className=' hover:text-green-200/30 transition delay-75'>
-          <FaPlay size={80} />
-        </button>
-        <button className='text-green-200/30 hover:text-inherit transition delay-75'>
-          <IoIosRefresh size={70} />
-        </button>
-        <button className='text-green-200/30 hover:text-inherit transition delay-75'>
-          <GiSaveArrow   size={60} />
-        </button>
-      </div>
-    )
-  }
+  const dispatch = useDispatch()
+  const timer = useSelector(selectTimer)
+  const currentStatus = timer.time.status
 
-  const timerTypesButtons = () => {
-    /* change bg-color when the timer type matches the action type of the button */
-    const bgColor = (actionType) => {
-      return (
-        timer.time.type.toUpperCase().search(actionType.toUpperCase()) !== -1 ?
-          'bg-white/30' : ''
-      )
+  const [seconds, setSeconds] = useState(timer.time.remaining)
+  const [isMount, setIsMount] = useState(false)
+
+  let intervalCounter
+
+  /* Set second every second if status is 'running' */
+  useEffect(() => {
+    if (timer.time.status === 'running') {
+      intervalCounter = setInterval(function() {
+        setSeconds((prevSec) => {
+          if(prevSec <= 0){
+            clearInterval(intervalCounter)
+            return 0
+          }
+          return prevSec - 1000
+        })
+      }, 1000)
+      return () => clearInterval(intervalCounter)
     }
+  }, [timer.time.status])
 
-    return (
-      <div className='py-5'>
-        {TIMER_TYPES.map(type => (
-          <button key={type} className={`btn_small_basic hover:bg-white/30 transition delay-100 ${bgColor(type)}`}>
-            {type}
-          </button>
-        ))}
-      </div>
-    )
-  }
+  useEffect(() => {
+    if (timer.time.status !== 'running') return
+    if(seconds > 0) {
+      dispatch(changeTimerStatus({ type: "remaining", value: seconds }))
+    } else {
+      dispatch(changeTimerStatus({ type: "status", value: "completed" }))
+    }
+  }, [seconds])
 
   const timerTags = () => {
     return (
-      <div className='mt-3 flex justify-center items-center'>
+      <div className='mt-2 flex justify-center items-center'>
         {timer.tags.map(tag => (
-          <button key={tag} className='btn_small_basic bg-teal-700 hover:bg-teal-600 transition delay-100'>
-            {tag}
+          <button key={tag} className='z-10 btn_small_basic bg-teal-700 
+            hover:bg-teal-600 transition delay-100 '>
+            #{tag}
           </button>
         ))}
-        <button className='rounded-full border transition delay-100'>
-          <IoIosAdd size={25} />
+
+        {/* add tag button */}
+        <button
+          className='no_ring z-10 rounded-full border border-white/50 flex w-28
+            hover:bg-white/20 transition delay-100 cursor-pointer'
+        >
+          <IoIosAdd size={25} className='absolute' />
+          <input
+            placeholder="Add Tags ..."
+            name='tags'
+            // onChange={(e) => dispatch(editText([e.target.name, e.target.value]))}
+            className='w-full truncate focus:ring-5 rounded-full pl-6 text-left'
+          />
         </button>
       </div>
     )
   }
 
-  const DurationDisplay = () => {
+  const handleChangeType = (e) => {
+    dispatch(changeTimerStatus({ type: "type", value: e.target.name }))
+  }
+
+  const handleToggleTimer = (e) => {
+    let value
+    if (currentStatus === "default") {
+      value = "running"
+    } else if (currentStatus === "running") {
+      value = "paused"
+    } else if (currentStatus === "paused") {
+      value = "running"
+    }
+    dispatch(changeTimerStatus({ type: "status", value }))
+  }
+
+  const handleResetTimer = (e) => {
+    dispatch(changeTimerStatus({ type: "status", value: "default" }))
+    setSeconds(timer.time.duration)
+  }
+
+  const timerActionsButtons = () => {
     return (
-      <span className='transition delay-75'>
-        {formatDate(timer.time.duration)}
-      </span>
+      <div className='py-2 flex flex-row items-center justify-center'>
+        <GiSaveArrow //@Todo: add save functionality
+          size={60}
+          name='completed'
+          className='text-green-200/30 hover:text-inherit transition delay-75'
+        />
+        {currentStatus === "paused" || currentStatus === "default" ?
+          <FaPlay
+            size={80}
+            onClick={handleToggleTimer}
+            className=' text-white/40 hover:text-inherit transition delay-75 mx-5'
+          />
+          :
+          <FaPause
+            size={80}
+            onClick={handleToggleTimer}
+            className='text-white/40 hover:text-inherit transition delay-75 mx-5'
+          />
+        }
+
+        <IoIosRefresh
+          size={65}
+          name='default'
+          onClick={handleResetTimer}
+          className='text-green-200/30 hover:text-inherit transition delay-75'
+        />
+
+      </div>
     )
   }
 
   return (
-    <div className=''>
-      {timerTypesButtons()}
-      <div className='mt-16'>
+    <div className='h-full flex flex-col justify-center lg:justify-between pb-16'>
+      {/* TIMER TYPE BUTTONS */}
+      <div className='pt-24 h-7 md:pt-0'>
+        <div className='hidden md:inline transition-all'>
+          {createSmallButtons(
+            timer.time.type,
+            TIMER_TYPES,
+            handleChangeType
+          )}
+        </div>
+      </div>
+
+      {/* TIMER CONTENT*/}
+      <div className='h-fit'>
+        {/* TIMER TITLE */}
         <h1>
           <input
             value={timer.title}
             name='title'
             onChange={(e) => dispatch(editText([e.target.name, e.target.value]))}
-            className='tracking-[0.4em] w-7/12 transition delay-75 '
+            className='mb-1 text-clip w-7/12
+              tracking-tight lg:tracking-[0.4em] md:tracking-[0.2em]  
+              hover:bg-teal-200/10 delay-400 transition-all ease-linear'
           />
         </h1>
+
+        {/* TIMER DESCRIPTION */}
         <input
           value={timer.description}
           name='description'
           onChange={(e) => dispatch(editText([e.target.name, e.target.value]))}
-          className='tracking-widest w-9/12 transition py-1'
+          className='truncate tracking-widest py-1 
+          hover:bg-teal-200/10 transition-all w-9/12 md:w-8/12 lg:w-5/12'
         />
         <br />
+
+        {/* TIMER TAGS */}
         {timerTags()}
 
+        {/* TIMER*/}
         <div
-          className='text-[15em] tracking-wider leading-tight text-stone-100'
+          className='tracking-wider leading-none py-5 text-stone-100 select-none
+          text-[10em] md:text-[15em] delay-500 transition-all ease-linear'
         >
-          <DurationDisplay />
+          {formatDate(seconds)}
         </div>
       </div>
-      {timerActionsButtons()}
 
+      {/* TIMER ACTION*/}
+      {timerActionsButtons()}
     </div>
   )
 }

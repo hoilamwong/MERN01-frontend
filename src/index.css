@@ -3,9 +3,11 @@
 @tailwind utilities;
 
 html {
-  height: 100dvh;
-  min-height: 100vh;
+  /* height: 100dvh;
+  min-height: 100vh; */
+  display: block;
 }
+
 
 body {
   height: 100%;
@@ -19,6 +21,7 @@ body {
   text-align: center;
   color: gainsboro;
   letter-spacing: 0.2em;
+  overflow-y: scroll; 
 }
 
 #root{
@@ -30,18 +33,16 @@ code {
 }
 
 a:visited{
-  color: rgb(33, 143, 110);
+  color: rgb(88, 133, 133);
   text-decoration: none;
   border-style: solid;
 }
 a:hover{
-  color: black;
+  color: inherit;
 }
 
 .btn_small_basic {
-  border-style: solid;
   border-radius: 0.5rem; /* 12px */
-  border-width: 1px;
   padding-left: 0.5rem;
   padding-right: 0.5rem;
   margin-left: 0.5rem;
@@ -57,8 +58,3 @@ input {
   /* margin-bottom: 0.5rem; */
   border-radius: 0.5rem; /* 12px */
 }
-
-input:hover {
-  background-color: rgba(46, 139, 86, 0.281);
-}
-

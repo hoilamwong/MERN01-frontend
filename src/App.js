@@ -11,8 +11,6 @@ import  UserActivities  from './features/activities/UserActivities'
 
 function App() {
   return (
-    <div className='h-lvh'>
-
    <Routes>
     <Route path="/" element={<Layout />}>
       <Route index element={<MainPage />} />
@@ -32,8 +30,6 @@ function App() {
 
     </Route>
    </Routes>
-   </div>
-
   );
 }
 

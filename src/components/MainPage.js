@@ -1,17 +1,13 @@
-import { Link } from 'react-router-dom'
 import Timer from '../features/timer/Timer'
+import MainInstruction from '../features/main/MainInstruction'
 
 const MainPage = () => {
   return (
-    <div>
-      <main >
+    <div className='h-lvh'>
+      <div className='h-5/6 md:h-lvh'>
         <Timer />
-      </main>
-      <footer>
-        <Link to="/login">Login</Link> <br/>
-        <Link to="/dash">Dash</Link>
-        {/* <Link to="/setting">Setting</Link> */}
-      </footer>
+      </div>
+      <MainInstruction />
     </div>
   )
 }
