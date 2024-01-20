@@ -2,12 +2,11 @@ import { useSelector, useDispatch } from 'react-redux'
 import { IoIosAdd, IoIosRefresh } from "react-icons/io";
 import { FaPlay, FaPause } from "react-icons/fa";
 import { GiSaveArrow } from "react-icons/gi";
-import { selectTimer, editText, changeTimerStatus } from './timerSlice'
+import { selectTimer, editText, changeTimerStatus, addNewTag } from './timerSlice'
 import { formatDate, createSmallButtons } from '../helper'
 import { useEffect, useState, useRef } from 'react';
 
 export default function Timer() {
-  const TIMER_ACTIONS = ['Start', 'Pause', 'Reset']
   const TIMER_TYPES = ['Pomodoro', 'Short Break', 'Long Break']
 
   const dispatch = useDispatch()
@@ -15,16 +14,30 @@ export default function Timer() {
   const currentStatus = timer.time.status
 
   const [seconds, setSeconds] = useState(timer.time.remaining)
+  const [newTag, setNewTag] = useState("")
 
-  let intervalCounter
+  let titleString = ' | Pomodooor Timer | '
+
+  if (currentStatus === "running") {
+    titleString = formatDate(seconds) + ' ' + timer.title + titleString
+  } else if (currentStatus === "running") {
+    titleString = formatDate(seconds) + ' ' + timer.title + titleString
+  }
+  document.title = titleString
 
   useEffect(() => {
     localStorage.setItem('localTimerActivity', JSON.stringify(timer))
   }, [timer])
 
+  /* Set Timer to Paused when Changed to Other Site */
+  // useEffect(()=> () => {
+  //     window.confirm('The Time will be paused. :(')
+  //     dispatch(changeTimerStatus({ type: "status", value: "paused" }))
+  //   },[])
 
   /* Set second every second if status is 'running' */
   useEffect(() => {
+    let intervalCounter
     if (timer.time.status === 'running') {
       intervalCounter = setInterval(function () {
         setSeconds((prevSec) => {
@@ -50,29 +63,38 @@ export default function Timer() {
 
   const timerTags = () => {
     return (
-      <div className='mt-2 flex justify-center items-center'>
-        {timer.tags.map(tag => (
-          <button key={tag} className='z-10 btn_small_basic bg-teal-700 
+      <div className='mt-2 flex justify-center items-center w-3/4 mx-auto'>
+        <div className='text-clip truncate w-fit mr-1 z-10'>
+          {timer.tags.map(tag => (
+            <button key={tag} className='btn_small_basic bg-teal-700 
             hover:bg-teal-600 transition delay-100 '>
-            #{tag}
-          </button>
-        ))}
-
+              #{tag}
+            </button>
+          ))}
+        </div>
         {/* add tag button */}
-        <button
-          className='no_ring z-10 rounded-full border border-white/50 flex w-28
+        <form
+          className='no_ring z-10 rounded-full border border-white/50  w-28 min-w-28
             hover:bg-white/20 transition delay-100 cursor-pointer'
+          onSubmit={(e) => handleAddTag(e)}
         >
-          <IoIosAdd size={25} className='absolute' />
+          <IoIosAdd size={25} className='absolute inline-block' />
           <input
             placeholder="Add Tags ..."
             name='tags'
-            // onChange={(e) => dispatch(editText([e.target.name, e.target.value]))}
+            value={newTag}
+            onChange={(e) => setNewTag(e.target.value)}
             className='w-full truncate focus:ring-5 rounded-full pl-6 text-left'
           />
-        </button>
+        </form>
       </div>
     )
+  }
+
+  const handleAddTag = (e) => {
+    e.preventDefault()
+    dispatch(addNewTag(newTag))
+    setNewTag("")
   }
 
   const handleChangeType = (e) => {
@@ -151,6 +173,7 @@ export default function Timer() {
             value={timer.title}
             name='title'
             onChange={(e) => dispatch(editText([e.target.name, e.target.value]))}
+            onSubmit={(e) => dispatch(addNewTag(newTag))}
             className='mb-1 text-clip w-7/12
               tracking-tight lg:tracking-[0.4em] md:tracking-[0.2em]  
               hover:bg-teal-200/10 delay-400 transition-all ease-linear'

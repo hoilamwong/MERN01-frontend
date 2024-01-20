@@ -20,9 +20,6 @@ const initialState = localStorage.getItem("localTimerActivity")
     }
   }
 
-// useEffect(()=>{
-//   initialState = localStorage.getItem("localTimeerActivity")? | 
-// },[])
 
 const timerSlice = createSlice({
   name: 'timer',
@@ -45,10 +42,13 @@ const timerSlice = createSlice({
         state.time.timeEnd = new Date().toString()
       }
     },
+    addNewTag: (state, action) => {
+      state.tags.push(action.payload)
+    }
   }
 })
 
 export const selectTimer = (state) => state.timer
-export const { editText, changeTimerStatus } = timerSlice.actions
+export const { editText, changeTimerStatus, addNewTag } = timerSlice.actions
 
 export default timerSlice.reducer;

@@ -32,8 +32,12 @@ code {
     monospace;
 }
 
-a:visited{
+a{
   color: rgb(88, 133, 133);
+}
+
+a:visited{
+  /* color: rgb(88, 133, 133); */
   text-decoration: none;
   border-style: solid;
 }
