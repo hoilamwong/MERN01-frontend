@@ -61,36 +61,6 @@ export default function Timer() {
     }
   }, [seconds])
 
-  const timerTags = () => {
-    return (
-      <div className='mt-2 flex justify-center items-center w-3/4 mx-auto'>
-        <div className='text-clip truncate w-fit mr-1 z-10'>
-          {timer.tags.map(tag => (
-            <button key={tag} className='btn_small_basic bg-teal-700 
-            hover:bg-teal-600 transition delay-100 '>
-              #{tag}
-            </button>
-          ))}
-        </div>
-        {/* add tag button */}
-        <form
-          className='no_ring z-10 rounded-full border border-white/50  w-28 min-w-28
-            hover:bg-white/20 transition delay-100 cursor-pointer'
-          onSubmit={(e) => handleAddTag(e)}
-        >
-          <IoIosAdd size={25} className='absolute inline-block' />
-          <input
-            placeholder="Add Tags ..."
-            name='tags'
-            value={newTag}
-            onChange={(e) => setNewTag(e.target.value)}
-            className='w-full truncate focus:ring-5 rounded-full pl-6 text-left'
-          />
-        </form>
-      </div>
-    )
-  }
-
   const handleAddTag = (e) => {
     e.preventDefault()
     dispatch(addNewTag(newTag))
@@ -122,19 +92,22 @@ export default function Timer() {
   const timerActionsButtons = () => {
     return (
       <div className='py-2 flex flex-row items-center justify-center'>
-        <GiSaveArrow //@Todo: add save functionality
+        <GiSaveArrow //@Todo: add save link & functionality
+          title='WIP save to account'
           size={60}
           name='completed'
           className='text-green-200/30 hover:text-inherit transition delay-75'
         />
         {currentStatus === "paused" || currentStatus === "default" ?
           <FaPlay
+            title='Start/ Continue'
             size={80}
             onClick={handleToggleTimer}
             className=' text-white/40 hover:text-inherit transition delay-75 mx-5'
           />
           :
           <FaPause
+            title='Pause'
             size={80}
             onClick={handleToggleTimer}
             className='text-white/40 hover:text-inherit transition delay-75 mx-5'
@@ -142,12 +115,48 @@ export default function Timer() {
         }
 
         <IoIosRefresh
+          title='Reset'
           size={65}
           name='default'
           onClick={handleResetTimer}
           className='text-green-200/30 hover:text-inherit transition delay-75'
         />
 
+      </div>
+    )
+  }
+
+  const timerTags = () => {
+    return (
+      <div className='mt-2 flex justify-center items-center w-3/4 mx-auto'>
+        <div className='text-clip truncate w-fit mr-1 z-10'>
+          {timer.tags.map(tag => (
+            <button 
+              key={tag} 
+              title={`#${tag}`}
+              className='btn_small_basic bg-teal-700 
+              hover:bg-teal-600 transition delay-100 '
+            >
+              #{tag}
+            </button>
+          ))}
+        </div>
+        {/* add tag button */}
+        <form
+          className='no_ring z-10 rounded-full border border-white/50  w-28 min-w-28
+            hover:bg-white/20 transition delay-100 cursor-pointer'
+          onSubmit={(e) => handleAddTag(e)}
+        >
+          <IoIosAdd size={25} className='absolute inline-block' />
+          <input
+            placeholder="Add Tags ..."
+            title='Add tag (Enter to submit)'
+            name='tags'
+            value={newTag}
+            onChange={(e) => setNewTag(e.target.value)}
+            className='w-full truncate focus:ring-5 rounded-full pl-6 text-left'
+          />
+        </form>
       </div>
     )
   }
@@ -172,6 +181,7 @@ export default function Timer() {
           <input
             value={timer.title}
             name='title'
+            title='Timer Title (Click to Edit)'
             onChange={(e) => dispatch(editText([e.target.name, e.target.value]))}
             onSubmit={(e) => dispatch(addNewTag(newTag))}
             className='mb-1 text-clip w-7/12
@@ -184,6 +194,7 @@ export default function Timer() {
         <input
           value={timer.description}
           name='description'
+          title='Timer Description (Click to Edit)'
           onChange={(e) => dispatch(editText([e.target.name, e.target.value]))}
           className='truncate tracking-widest py-1 
           hover:bg-teal-200/10 transition-all w-9/12 md:w-8/12 lg:w-5/12'

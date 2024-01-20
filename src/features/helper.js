@@ -32,6 +32,7 @@ export const createSmallButtons = (condition, arr, method) => {
   return (
     arr.map(item => (
       <button 
+        title={`${item}`}
         key={item} 
         name={item}
         onClick={method}
