@@ -25,15 +25,23 @@ export const formatDate = (duration) => {
 export const createSmallButtons = (condition, arr, method) => {
   /* change bg-color when the item of an arr contains the condition string*/
   // actionType (button) name is typically longer than the set codition state
-  const bgColor = (actionType) => (
-    actionType.toUpperCase().search(condition.toUpperCase()) !== -1 ?
-      'bg-white/30' : ''
-  )
+  const bgColor = (actionType) => {
+
+    const actionString = actionType.toUpperCase().replace(/\s/g, '')
+    const conditionString = condition.toUpperCase().replace(/\s/g, '')
+    if(actionString.search(conditionString) !== -1){
+      return 'bg-white/30'
+    } else {
+      return ''
+    }
+    // actionType.replace('/\s/g', "").toUpperCase().search(condition.toUpperCase()) !== -1 ?
+    //   'bg-white/30' : ''
+  }
   return (
     arr.map(item => (
-      <button 
+      <button
         title={`${item}`}
-        key={item} 
+        key={item}
         name={item}
         onClick={method}
         className={`btn_small_basic hover:bg-white/30 transition  ${bgColor(item)}`}
@@ -45,15 +53,15 @@ export const createSmallButtons = (condition, arr, method) => {
 }
 
 export const toggleDisplayContent = (condition, arr) => {
-   /* change bg-color when the timer type matches the action type of the button */
-   const visible = (actionType) => (
+  /* change bg-color when the timer type matches the action type of the button */
+  const visible = (actionType) => (
     condition.toUpperCase().search(actionType.toUpperCase()) !== -1 ?
       'inline' : 'hidden'
   )
   return (
     arr.map(item => (
-      <div 
-        key={item} 
+      <div
+        key={item}
         className={`${visible(item)}`}
       >
         {item} helllllllllllo

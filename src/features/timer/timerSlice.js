@@ -2,13 +2,14 @@ import { createSlice } from '@reduxjs/toolkit'
 import { useEffect } from 'react'
 
 // console.log(localStorage.getItem("localTimerActivity"));
-const initialState = localStorage.getItem("localTimerActivity")
-  ? JSON.parse(localStorage.getItem("localTimerActivity"))
-  : 
+const initialState = 
+// localStorage.getItem("localTimerActivity")
+  // ? JSON.parse(localStorage.getItem("localTimerActivity"))
+  // : 
   {
     user: null,
     title: "Pomodoro #0",
-    description: "Chapter 1 | What is Pomodoro Technique? | How to Use? |",
+    description: "Chapter 1 | What is Pomodoro Technique? | How to Use? | Join Now",
     tags: ['pomodoro'],
     time: {
       type: "pomodoro",
@@ -17,7 +18,12 @@ const initialState = localStorage.getItem("localTimerActivity")
       remaining: 25 * 60 * 1000,
       timeStarted: null,
       timeEnd: null,
-    }
+    },
+    timerDurations: {
+      pomodoro: 25 * 60 * 1000, //25 min
+      shortBreak: 0.05 * 60 * 1000, //5 min
+      longBreak: 15 * 60 * 1000, //5 min
+    },
   }
 
 
@@ -44,11 +50,16 @@ const timerSlice = createSlice({
     },
     addNewTag: (state, action) => {
       state.tags.push(action.payload)
+    },
+    changeTimerType: (state, action) => {
+      const newType = action.payload
+      state.time.type = newType
+      state.time.duration = state.timerDurations[`${newType}`]
     }
   }
 })
 
 export const selectTimer = (state) => state.timer
-export const { editText, changeTimerStatus, addNewTag } = timerSlice.actions
+export const { editText, changeTimerStatus, addNewTag, changeTimerType } = timerSlice.actions
 
 export default timerSlice.reducer;

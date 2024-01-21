@@ -2,7 +2,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { IoIosAdd, IoIosRefresh } from "react-icons/io";
 import { FaPlay, FaPause } from "react-icons/fa";
 import { GiSaveArrow } from "react-icons/gi";
-import { selectTimer, editText, changeTimerStatus, addNewTag } from './timerSlice'
+import { selectTimer, editText, changeTimerStatus, addNewTag, changeTimerType  } from './timerSlice'
 import { formatDate, createSmallButtons } from '../helper'
 import { useEffect, useState, useRef } from 'react';
 
@@ -20,20 +20,14 @@ export default function Timer() {
 
   if (currentStatus === "running") {
     titleString = formatDate(seconds) + ' ' + timer.title + titleString
-  } else if (currentStatus === "running") {
-    titleString = formatDate(seconds) + ' ' + timer.title + titleString
+  } else if (currentStatus === "completed") {
+    titleString = 'TIMES UP!' + formatDate(seconds) + ' ' + timer.title + titleString
   }
   document.title = titleString
 
   useEffect(() => {
     localStorage.setItem('localTimerActivity', JSON.stringify(timer))
   }, [timer])
-
-  /* Set Timer to Paused when Changed to Other Site */
-  // useEffect(()=> () => {
-  //     window.confirm('The Time will be paused. :(')
-  //     dispatch(changeTimerStatus({ type: "status", value: "paused" }))
-  //   },[])
 
   /* Set second every second if status is 'running' */
   useEffect(() => {
@@ -50,16 +44,26 @@ export default function Timer() {
       }, 1000)
       return () => clearInterval(intervalCounter)
     }
+    console.log(timer.time.status);
   }, [timer.time.status])
 
   useEffect(() => {
     if (timer.time.status !== 'running') return
-    if (seconds > -1) {
-      dispatch(changeTimerStatus({ type: "remaining", value: seconds }))
-    } else {
+    if (seconds <= 0) {
       dispatch(changeTimerStatus({ type: "status", value: "completed" }))
-    }
+    } 
+    dispatch(changeTimerStatus({ type: "remaining", value: seconds }))
   }, [seconds])
+
+  const confirmReset = () => {
+    if(timer.time.status === "running" || timer.time.status === "paused"){
+      if(window.confirm("Timer is currently active and will be reset. Would you like to continue?") === false){
+        return false
+      }
+    }
+    return true
+  }
+
 
   const handleAddTag = (e) => {
     e.preventDefault()
@@ -68,7 +72,18 @@ export default function Timer() {
   }
 
   const handleChangeType = (e) => {
-    dispatch(changeTimerStatus({ type: "type", value: e.target.name }))
+    if(confirmReset() === false) return
+    let newType
+    if(e.target.name === "Pomodoro"){
+      newType = 'pomodoro'
+    }else if(e.target.name === 'Short Break'){
+      newType = 'shortBreak'
+    }else if(e.target.name === 'Long Break'){
+      newType = 'longBreak'
+    }
+    dispatch(changeTimerType(newType))
+    handleResetTimer()
+    setSeconds(timer.timerDurations[`${newType}`]) 
   }
 
   const handleToggleTimer = (e) => {
@@ -84,6 +99,7 @@ export default function Timer() {
   }
 
   const handleResetTimer = (e) => {
+    if(confirmReset() === false) return
     dispatch(changeTimerStatus({ type: "status", value: "default" }))
     dispatch(changeTimerStatus({ type: "remaining", value: timer.time.duration }))
     setSeconds(timer.time.duration)
@@ -95,7 +111,7 @@ export default function Timer() {
         <GiSaveArrow //@Todo: add save link & functionality
           title='WIP save to account'
           size={60}
-          name='completed'
+          name='save'
           className='text-green-200/30 hover:text-inherit transition delay-75'
         />
         {currentStatus === "paused" || currentStatus === "default" ?
@@ -160,6 +176,7 @@ export default function Timer() {
       </div>
     )
   }
+
 
   return (
     <div className='h-full flex flex-col justify-center lg:justify-between pb-16'>
