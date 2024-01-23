@@ -21,7 +21,7 @@ const initialState =
     },
     timerDurations: {
       pomodoro: 25 * 60 * 1000, //25 min
-      shortBreak: 0.05 * 60 * 1000, //5 min
+      shortBreak: 5 * 60 * 1000, //5 min
       longBreak: 15 * 60 * 1000, //5 min
     },
   }

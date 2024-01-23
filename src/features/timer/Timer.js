@@ -1,8 +1,8 @@
 import { useSelector, useDispatch } from 'react-redux'
 import { IoIosAdd, IoIosRefresh } from "react-icons/io";
-import { FaPlay, FaPause } from "react-icons/fa";
+import { FaPlay, FaPause, FaStop } from "react-icons/fa";
 import { GiSaveArrow } from "react-icons/gi";
-import { selectTimer, editText, changeTimerStatus, addNewTag, changeTimerType  } from './timerSlice'
+import { selectTimer, editText, changeTimerStatus, addNewTag, changeTimerType } from './timerSlice'
 import { formatDate, createSmallButtons } from '../helper'
 import { useEffect, useState, useRef } from 'react';
 
@@ -16,12 +16,13 @@ export default function Timer() {
   const [seconds, setSeconds] = useState(timer.time.remaining)
   const [newTag, setNewTag] = useState("")
 
+  let [alarmAudio] = useState(new Audio(window.location.origin + '/Daybreak.mp3'))
   let titleString = ' | Pomodooor Timer | '
 
   if (currentStatus === "running") {
     titleString = formatDate(seconds) + ' ' + timer.title + titleString
   } else if (currentStatus === "completed") {
-    titleString = 'TIMES UP!' + formatDate(seconds) + ' ' + timer.title + titleString
+    titleString = 'TIMES UP! ' + formatDate(seconds) + ' ' + timer.title + titleString
   }
   document.title = titleString
 
@@ -33,6 +34,7 @@ export default function Timer() {
   useEffect(() => {
     let intervalCounter
     if (timer.time.status === 'running') {
+
       intervalCounter = setInterval(function () {
         setSeconds((prevSec) => {
           if (prevSec <= 0) {
@@ -44,26 +46,25 @@ export default function Timer() {
       }, 1000)
       return () => clearInterval(intervalCounter)
     }
-    console.log(timer.time.status);
   }, [timer.time.status])
 
   useEffect(() => {
     if (timer.time.status !== 'running') return
     if (seconds <= 0) {
       dispatch(changeTimerStatus({ type: "status", value: "completed" }))
-    } 
+      alarmAudio.play()
+    }
     dispatch(changeTimerStatus({ type: "remaining", value: seconds }))
   }, [seconds])
 
   const confirmReset = () => {
-    if(timer.time.status === "running" || timer.time.status === "paused"){
-      if(window.confirm("Timer is currently active and will be reset. Would you like to continue?") === false){
+    if (timer.time.status === "running" || timer.time.status === "paused") {
+      if (window.confirm("Timer is currently active and will be reset. Would you like to continue?") === false) {
         return false
       }
     }
     return true
   }
-
 
   const handleAddTag = (e) => {
     e.preventDefault()
@@ -72,18 +73,18 @@ export default function Timer() {
   }
 
   const handleChangeType = (e) => {
-    if(confirmReset() === false) return
+    if (confirmReset() === false) return
     let newType
-    if(e.target.name === "Pomodoro"){
+    if (e.target.name === "Pomodoro") {
       newType = 'pomodoro'
-    }else if(e.target.name === 'Short Break'){
+    } else if (e.target.name === 'Short Break') {
       newType = 'shortBreak'
-    }else if(e.target.name === 'Long Break'){
+    } else if (e.target.name === 'Long Break') {
       newType = 'longBreak'
     }
     dispatch(changeTimerType(newType))
     handleResetTimer()
-    setSeconds(timer.timerDurations[`${newType}`]) 
+    setSeconds(timer.timerDurations[`${newType}`])
   }
 
   const handleToggleTimer = (e) => {
@@ -94,12 +95,17 @@ export default function Timer() {
       value = "paused"
     } else if (currentStatus === "paused") {
       value = "running"
+    } else if (currentStatus === "completed") {
+      value = "default"
+      handleResetTimer()
     }
     dispatch(changeTimerStatus({ type: "status", value }))
   }
 
   const handleResetTimer = (e) => {
-    if(confirmReset() === false) return
+    alarmAudio.pause()
+    alarmAudio.currentTime = 0
+    if (confirmReset() === false) return
     dispatch(changeTimerStatus({ type: "status", value: "default" }))
     dispatch(changeTimerStatus({ type: "remaining", value: timer.time.duration }))
     setSeconds(timer.time.duration)
@@ -107,29 +113,37 @@ export default function Timer() {
 
   const timerActionsButtons = () => {
     return (
-      <div className='py-2 flex flex-row items-center justify-center'>
+      <div className='py-2 flex flex-row items-center justify-center pt-12 lg:pt-0'>
         <GiSaveArrow //@Todo: add save link & functionality
           title='WIP save to account'
           size={60}
           name='save'
           className='text-green-200/30 hover:text-inherit transition delay-75'
         />
-        {currentStatus === "paused" || currentStatus === "default" ?
+        {(currentStatus === "paused" || currentStatus === "default") &&
           <FaPlay
             title='Start/ Continue'
             size={80}
             onClick={handleToggleTimer}
             className=' text-white/40 hover:text-inherit transition delay-75 mx-5'
           />
-          :
+        }
+        {(currentStatus === "running") &&
           <FaPause
-            title='Pause'
+            title='Pause Timer'
             size={80}
             onClick={handleToggleTimer}
             className='text-white/40 hover:text-inherit transition delay-75 mx-5'
           />
         }
-
+        {(currentStatus === "completed") &&
+          <FaStop
+            title='Stop and Reset Timer'
+            size={80}
+            onClick={handleToggleTimer}
+            className='text-red-400/50 hover:text-red-400 transition delay-75 mx-5'
+          />
+        }
         <IoIosRefresh
           title='Reset'
           size={65}
@@ -147,8 +161,8 @@ export default function Timer() {
       <div className='mt-2 flex justify-center items-center w-3/4 mx-auto'>
         <div className='text-clip truncate w-fit mr-1 z-10'>
           {timer.tags.map(tag => (
-            <button 
-              key={tag} 
+            <button
+              key={tag}
               title={`#${tag}`}
               className='btn_small_basic bg-teal-700 
               hover:bg-teal-600 transition delay-100 '
