@@ -2,15 +2,15 @@ import { useSelector, useDispatch } from 'react-redux'
 import { IoIosAdd, IoIosRefresh } from "react-icons/io";
 import { FaPlay, FaPause, FaStop } from "react-icons/fa";
 import { GiSaveArrow } from "react-icons/gi";
-import { 
-  selectTimer, 
-  editText, 
-  addNewTag, 
-  changeTimerStatus, 
-  changeTimerType, 
-  changeTimerRemaining, 
+import {
+  selectTimer,
+  editText,
+  addNewTag,
+  changeTimerStatus,
+  changeTimerType,
+  changeTimerRemaining,
   resetTimer,
-  toggleTimer,  
+  toggleTimer,
 } from './timerSlice'
 import { formatDate, createSmallButtons } from '../helper'
 import { useEffect, useState, useRef } from 'react';
@@ -52,7 +52,7 @@ export default function Timer() {
   useEffect(() => {
     if (timer.timerStatus !== 'running') return
     if (seconds <= 0) {
-      dispatch(changeTimerStatus("completed" ))
+      dispatch(changeTimerStatus("completed"))
       alarmAudio.play()
     }
     dispatch(changeTimerRemaining(seconds))
@@ -93,6 +93,8 @@ export default function Timer() {
   }
 
   const handleToggleTimer = (e) => {
+    alarmAudio.pause()
+    alarmAudio.currentTime = 0
     dispatch(toggleTimer())
   }
 
@@ -106,45 +108,47 @@ export default function Timer() {
 
   const timerActionsButtons = () => {
     return (
-      <div className='py-2 flex flex-row items-center justify-center pt-12 lg:pt-0'>
-        <GiSaveArrow //@Todo: add save link & functionality
-          title='WIP save to account'
-          size={60}
-          name='save'
-          className='text-green-200/30 hover:text-inherit transition delay-75'
-        />
-        {(currentStatus === "paused" || currentStatus === "default") &&
-          <FaPlay
-            title='Start/ Continue'
-            size={80}
-            onClick={handleToggleTimer}
-            className=' text-white/40 hover:text-inherit transition delay-75 mx-5'
+      <div>
+        <div className='py-2 flex flex-row items-center justify-center pt-12 lg:pt-0'>
+          <GiSaveArrow //@Todo: add save link & functionality
+            title='WIP save to account'
+            size={60}
+            name='save'
+            className='text-green-200/30 hover:text-inherit transition delay-75'
           />
-        }
-        {(currentStatus === "running") &&
-          <FaPause
-            title='Pause Timer'
-            size={80}
-            onClick={handleToggleTimer}
-            className='text-white/40 hover:text-inherit transition delay-75 mx-5'
+          {(currentStatus === "paused" || currentStatus === "default") &&
+            <FaPlay
+              title='Start/ Continue'
+              size={80}
+              onClick={handleToggleTimer}
+              className=' text-white/40 hover:text-inherit transition delay-75 mx-5'
+            />
+          }
+          {(currentStatus === "running") &&
+            <FaPause
+              title='Pause Timer'
+              size={80}
+              onClick={handleToggleTimer}
+              className='text-white/40 hover:text-inherit transition delay-75 mx-5'
+            />
+          }
+          {(currentStatus === "completed") &&
+            <FaStop
+              title='Stop Alarm'
+              size={80}
+              onClick={handleToggleTimer}
+              className='text-red-400/50 hover:text-red-400 transition delay-75 mx-5'
+            />
+          }
+          <IoIosRefresh
+            title='Reset'
+            size={65}
+            name='default'
+            onClick={handleResetTimer}
+            className='text-green-200/30 hover:text-inherit transition delay-75'
           />
-        }
-        {(currentStatus === "completed") &&
-          <FaStop
-            title='Stop and Reset Timer'
-            size={80}
-            onClick={handleToggleTimer}
-            className='text-red-400/50 hover:text-red-400 transition delay-75 mx-5'
-          />
-        }
-        <IoIosRefresh
-          title='Reset'
-          size={65}
-          name='default'
-          onClick={handleResetTimer}
-          className='text-green-200/30 hover:text-inherit transition delay-75'
-        />
-
+          <br />
+        </div>
       </div>
     )
   }
@@ -241,6 +245,15 @@ export default function Timer() {
 
         {/* TIMER ACTION*/}
         {timerActionsButtons()}
+
+        {timer.timerRemaining === 0 &&
+          <div
+            className='absolute bottom-36 w-44 border m-12 rounded-lg p-2 bg-red-400/30 md:bottom-0'
+          >
+            Timer Finished! <br/> Reset to Start a New Timer!
+          </div>
+        }
+
       </div>
     </>
   )

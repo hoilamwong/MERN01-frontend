@@ -69,9 +69,6 @@ const timerSlice = createSlice({
         value = "paused"
       } else if (state.timerStatus === "paused") {
         value = "running"
-      } else if (state.timerStatus === "completed") {
-        value = "default"
-        resetTimer()
       }
 
       state.timerStatus = value
