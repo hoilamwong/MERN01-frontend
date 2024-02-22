@@ -14,7 +14,7 @@ const initialState =
   timerType: "POMODORO",
   timerStatus: "default", //default | running | paused | completed | 
   timerDuration: 25 * 60 * 1000, //default 25 min ( 25 * 60 s *1000 ms)
-  timerRemaining: 23 * 60 * 1000,
+  timerRemaining: 25 * 60 * 1000,
   timerStarted: null,
   timerEnd: null,
   timerDefaults: {
