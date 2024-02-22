@@ -2,27 +2,25 @@ import { createSlice } from '@reduxjs/toolkit'
 import { useEffect } from 'react'
 
 // console.log(localStorage.getItem("localTimerActivity"));
-const initialState = 
+const initialState =
 // localStorage.getItem("localTimerActivity")
-  // ? JSON.parse(localStorage.getItem("localTimerActivity"))
-  // : 
+// ? JSON.parse(localStorage.getItem("localTimerActivity"))
+// : 
   {
     user: null,
     title: "Pomodoro #0",
     description: "Chapter 1 | What is Pomodoro Technique? | How to Use? | Join Now",
     tags: ['pomodoro'],
-    time: {
-      type: "pomodoro",
-      status: "default", //default | running | paused | completed | 
-      duration: 25 * 60 * 1000, //default 25 min ( 25 * 60 s *1000 ms)
-      remaining: 25 * 60 * 1000,
-      timeStarted: null,
-      timeEnd: null,
-    },
-    timerDurations: {
-      pomodoro: 25 * 60 * 1000, //25 min
-      shortBreak: 5 * 60 * 1000, //5 min
-      longBreak: 15 * 60 * 1000, //5 min
+    timerType: "POMODORO",
+    timerStatus: "default", //default | running | paused | completed | 
+    timerDuration: 25 * 60 * 1000, //default 25 min ( 25 * 60 s *1000 ms)
+    timerRemaining: 23 * 60 * 1000,
+    timerStarted: null,
+    timerEnd: null,
+    timerDefaults: {
+      POMODORO: 25 * 60 * 1000, //25 min
+      SHORTBREAK: 5 * 60 * 1000, //5 min
+      LONGBREAK: 15 * 60 * 1000, //5 min
     },
   }
 
@@ -53,13 +51,18 @@ const timerSlice = createSlice({
     },
     changeTimerType: (state, action) => {
       const newType = action.payload
-      state.time.type = newType
-      state.time.duration = state.timerDurations[`${newType}`]
+
+      state.timerType = newType
+      state.timerDuration = state.timerDefaults[`${newType}`]
+    },
+    resetTimer: (state, action) => {
+      state.timerStatus = "default"
+      state.timerRemaining = state.timerDuration
     }
   }
 })
 
 export const selectTimer = (state) => state.timer
-export const { editText, changeTimerStatus, addNewTag, changeTimerType } = timerSlice.actions
+export const { editText, changeTimerStatus, addNewTag, changeTimerType, resetTimer } = timerSlice.actions
 
 export default timerSlice.reducer;

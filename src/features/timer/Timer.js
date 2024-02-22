@@ -2,7 +2,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { IoIosAdd, IoIosRefresh } from "react-icons/io";
 import { FaPlay, FaPause, FaStop } from "react-icons/fa";
 import { GiSaveArrow } from "react-icons/gi";
-import { selectTimer, editText, changeTimerStatus, addNewTag, changeTimerType } from './timerSlice'
+import { selectTimer, editText, changeTimerStatus, addNewTag, changeTimerType, resetTimer } from './timerSlice'
 import { formatDate, createSmallButtons } from '../helper'
 import { useEffect, useState, useRef } from 'react';
 
@@ -11,20 +11,12 @@ export default function Timer() {
 
   const dispatch = useDispatch()
   const timer = useSelector(selectTimer)
-  const currentStatus = timer.time.status
+  const currentStatus = timer.timerStatus
 
-  const [seconds, setSeconds] = useState(timer.time.remaining)
+  const [seconds, setSeconds] = useState(timer.timerRemaining)
   const [newTag, setNewTag] = useState("")
 
   let [alarmAudio] = useState(new Audio(window.location.origin + '/Daybreak.mp3'))
-  let titleString = ' | Pomodooor Timer | '
-
-  if (currentStatus === "running") {
-    titleString = formatDate(seconds) + ' ' + timer.title + titleString
-  } else if (currentStatus === "completed") {
-    titleString = 'TIMES UP! ' + formatDate(seconds) + ' ' + timer.title + titleString
-  }
-  document.title = titleString
 
   useEffect(() => {
     localStorage.setItem('localTimerActivity', JSON.stringify(timer))
@@ -33,7 +25,7 @@ export default function Timer() {
   /* Set second every second if status is 'running' */
   useEffect(() => {
     let intervalCounter
-    if (timer.time.status === 'running') {
+    if (timer.timerStatus === 'running') {
 
       intervalCounter = setInterval(function () {
         setSeconds((prevSec) => {
@@ -46,10 +38,10 @@ export default function Timer() {
       }, 1000)
       return () => clearInterval(intervalCounter)
     }
-  }, [timer.time.status])
+  }, [timer.timerStatus])
 
   useEffect(() => {
-    if (timer.time.status !== 'running') return
+    if (timer.timerStatus !== 'running') return
     if (seconds <= 0) {
       dispatch(changeTimerStatus({ type: "status", value: "completed" }))
       alarmAudio.play()
@@ -57,8 +49,20 @@ export default function Timer() {
     dispatch(changeTimerStatus({ type: "remaining", value: seconds }))
   }, [seconds])
 
+  /* TIMER PAGE TITLE */
+  const timerPageTitle = () => {
+    let titleString = ' | Pomodooor Timer | '
+
+    if (currentStatus === "running") {
+      titleString = formatDate(seconds) + ' ' + timer.title + titleString
+    } else if (currentStatus === "completed") {
+      titleString = 'TIMES UP! ' + formatDate(seconds) + ' ' + timer.title + titleString
+    }
+    document.title = titleString
+  }
+
   const confirmReset = () => {
-    if (timer.time.status === "running" || timer.time.status === "paused") {
+    if (timer.timerStatus === "running" || timer.timerStatus === "paused") {
       if (window.confirm("Timer is currently active and will be reset. Would you like to continue?") === false) {
         return false
       }
@@ -74,41 +78,33 @@ export default function Timer() {
 
   const handleChangeType = (e) => {
     if (confirmReset() === false) return
-    let newType
-    if (e.target.name === "Pomodoro") {
-      newType = 'pomodoro'
-    } else if (e.target.name === 'Short Break') {
-      newType = 'shortBreak'
-    } else if (e.target.name === 'Long Break') {
-      newType = 'longBreak'
-    }
+    let newType = e.target.name.toUpperCase().replace(/\s/g, '')
     dispatch(changeTimerType(newType))
     handleResetTimer()
-    setSeconds(timer.timerDurations[`${newType}`])
+    setSeconds(timer.timerDefaults[`${newType}`])
   }
 
   const handleToggleTimer = (e) => {
-    let value
-    if (currentStatus === "default") {
-      value = "running"
-    } else if (currentStatus === "running") {
-      value = "paused"
-    } else if (currentStatus === "paused") {
-      value = "running"
-    } else if (currentStatus === "completed") {
-      value = "default"
-      handleResetTimer()
-    }
-    dispatch(changeTimerStatus({ type: "status", value }))
+    // let value
+    // if (currentStatus === "default") {
+    //   value = "running"
+    // } else if (currentStatus === "running") {
+    //   value = "paused"
+    // } else if (currentStatus === "paused") {
+    //   value = "running"
+    // } else if (currentStatus === "completed") {
+    //   value = "default"
+    //   handleResetTimer()
+    // }
+    // dispatch(changeTimerStatus({ type: "status", value }))
   }
 
   const handleResetTimer = (e) => {
     alarmAudio.pause()
     alarmAudio.currentTime = 0
     if (confirmReset() === false) return
-    dispatch(changeTimerStatus({ type: "status", value: "default" }))
-    dispatch(changeTimerStatus({ type: "remaining", value: timer.time.duration }))
-    setSeconds(timer.time.duration)
+    dispatch(resetTimer())
+    setSeconds(timer.timerDuration)
   }
 
   const timerActionsButtons = () => {
@@ -193,59 +189,62 @@ export default function Timer() {
 
 
   return (
-    <div className='h-full flex flex-col justify-center lg:justify-between pb-16'>
-      {/* TIMER TYPE BUTTONS */}
-      <div className='pt-24 h-7 md:pt-0'>
-        <div className='hidden md:inline transition-all'>
-          {createSmallButtons(
-            timer.time.type,
-            TIMER_TYPES,
-            handleChangeType
-          )}
+    <>
+      {timerPageTitle()}
+      <div className='h-full flex flex-col justify-center lg:justify-between pb-16'>
+        {/* TIMER TYPE BUTTONS */}
+        <div className='pt-24 h-7 md:pt-0'>
+          <div className='hidden md:inline transition-all'>
+            {createSmallButtons(
+              timer.timerType,
+              TIMER_TYPES,
+              handleChangeType
+            )}
+          </div>
         </div>
-      </div>
 
-      {/* TIMER CONTENT*/}
-      <div className='h-fit'>
-        {/* TIMER TITLE */}
-        <h1>
-          <input
-            value={timer.title}
-            name='title'
-            title='Timer Title (Click to Edit)'
-            onChange={(e) => dispatch(editText([e.target.name, e.target.value]))}
-            onSubmit={(e) => dispatch(addNewTag(newTag))}
-            className='mb-1 text-clip w-7/12
+        {/* TIMER CONTENT*/}
+        <div className='h-fit'>
+          {/* TIMER TITLE */}
+          <h1>
+            <input
+              value={timer.title}
+              name='title'
+              title='Timer Title (Click to Edit)'
+              onChange={(e) => dispatch(editText([e.target.name, e.target.value]))}
+              onSubmit={(e) => dispatch(addNewTag(newTag))}
+              className='mb-1 text-clip w-7/12
               tracking-tight lg:tracking-[0.4em] md:tracking-[0.2em]  
               hover:bg-teal-200/10 delay-400 transition-all ease-linear'
-          />
-        </h1>
+            />
+          </h1>
 
-        {/* TIMER DESCRIPTION */}
-        <input
-          value={timer.description}
-          name='description'
-          title='Timer Description (Click to Edit)'
-          onChange={(e) => dispatch(editText([e.target.name, e.target.value]))}
-          className='truncate tracking-widest py-1 
+          {/* TIMER DESCRIPTION */}
+          <input
+            value={timer.description}
+            name='description'
+            title='Timer Description (Click to Edit)'
+            onChange={(e) => dispatch(editText([e.target.name, e.target.value]))}
+            className='truncate tracking-widest py-1 
           hover:bg-teal-200/10 transition-all w-9/12 md:w-8/12 lg:w-5/12'
-        />
-        <br />
+          />
+          <br />
 
-        {/* TIMER TAGS */}
-        {timerTags()}
+          {/* TIMER TAGS */}
+          {timerTags()}
 
-        {/* TIMER*/}
-        <div
-          className='tracking-wider leading-none py-5 text-stone-100 select-none
+          {/* TIMER*/}
+          <div
+            className='tracking-wider leading-none py-5 text-stone-100 select-none
           text-[10em] md:text-[15em] delay-500 transition-all ease-linear'
-        >
-          {formatDate(seconds)}
+          >
+            {formatDate(seconds)}
+          </div>
         </div>
-      </div>
 
-      {/* TIMER ACTION*/}
-      {timerActionsButtons()}
-    </div>
+        {/* TIMER ACTION*/}
+        {timerActionsButtons()}
+      </div>
+    </>
   )
 }
