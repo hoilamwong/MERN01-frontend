@@ -2,7 +2,16 @@ import { useSelector, useDispatch } from 'react-redux'
 import { IoIosAdd, IoIosRefresh } from "react-icons/io";
 import { FaPlay, FaPause, FaStop } from "react-icons/fa";
 import { GiSaveArrow } from "react-icons/gi";
-import { selectTimer, editText, changeTimerStatus, addNewTag, changeTimerType, resetTimer } from './timerSlice'
+import { 
+  selectTimer, 
+  editText, 
+  addNewTag, 
+  changeTimerStatus, 
+  changeTimerType, 
+  changeTimerRemaining, 
+  resetTimer,
+  toggleTimer,  
+} from './timerSlice'
 import { formatDate, createSmallButtons } from '../helper'
 import { useEffect, useState, useRef } from 'react';
 
@@ -43,10 +52,10 @@ export default function Timer() {
   useEffect(() => {
     if (timer.timerStatus !== 'running') return
     if (seconds <= 0) {
-      dispatch(changeTimerStatus({ type: "status", value: "completed" }))
+      dispatch(changeTimerStatus("completed" ))
       alarmAudio.play()
     }
-    dispatch(changeTimerStatus({ type: "remaining", value: seconds }))
+    dispatch(changeTimerRemaining(seconds))
   }, [seconds])
 
   /* TIMER PAGE TITLE */
@@ -80,23 +89,11 @@ export default function Timer() {
     if (confirmReset() === false) return
     let newType = e.target.name.toUpperCase().replace(/\s/g, '')
     dispatch(changeTimerType(newType))
-    handleResetTimer()
     setSeconds(timer.timerDefaults[`${newType}`])
   }
 
   const handleToggleTimer = (e) => {
-    // let value
-    // if (currentStatus === "default") {
-    //   value = "running"
-    // } else if (currentStatus === "running") {
-    //   value = "paused"
-    // } else if (currentStatus === "paused") {
-    //   value = "running"
-    // } else if (currentStatus === "completed") {
-    //   value = "default"
-    //   handleResetTimer()
-    // }
-    // dispatch(changeTimerStatus({ type: "status", value }))
+    dispatch(toggleTimer())
   }
 
   const handleResetTimer = (e) => {
