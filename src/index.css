@@ -3,9 +3,7 @@
 @tailwind utilities;
 
 html {
-  /* height: 100dvh;
-  min-height: 100vh; */
-  display: block;
+  width: 100%;
 }
 
 
@@ -21,7 +19,6 @@ body {
   text-align: center;
   color: gainsboro;
   letter-spacing: 0.2em;
-  overflow-y: scroll; 
 }
 
 #root{

@@ -3,12 +3,12 @@ import LayoutHeader from './LayoutHeader'
 
 const Layout = () => {
   return (
-    <>
+    <div className="overflow-x-hidden relative">
       <LayoutHeader />
-      <div>
+      <div className="h-lvh py-4">
         <Outlet />
       </div>
-    </>
+    </div>
   )
 }
 

@@ -1,5 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
 import { apiSlice } from "./api/apiSlice";
+import { setupListeners } from "@reduxjs/toolkit/query"
 import timerReducer from "../features/timer/timerSlice"
 
 export const store = configureStore({
@@ -10,3 +11,5 @@ export const store = configureStore({
   middleware: getDefaultMiddleware => getDefaultMiddleware().concat(apiSlice.middleware),
   devTools: true
 })
+
+setupListeners(store.dispatch)

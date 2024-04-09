@@ -237,7 +237,7 @@ export default function Timer() {
           {/* TIMER*/}
           <div
             className='tracking-wider leading-none py-5 text-stone-100 select-none
-          text-[10em] md:text-[15em] delay-500 transition-all ease-linear'
+          text-[8em] md:text-[15em] delay-500 transition-all ease-linear'
           >
             {formatDate(seconds)}
           </div>

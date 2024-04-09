@@ -45,7 +45,7 @@ const MainInstruction = () => {
   }
 
   return (
-    <div className='h-lvh'>
+    <div className='h-lvh w-full'>
       <div className='h-fit bg-white/10 py-8'>
         <div>
           {createSmallButtons(clicked, instructions, handleClicked)}
